@@ -2,6 +2,8 @@ import pygame
 import os.path
 import serial
 import term_calc as tc
+from collections import deque
+import time
 
 def get_color(temp):
     if temp < 20.0:
@@ -12,11 +14,24 @@ def get_color(temp):
         return (255,248,43) #Naranja
     if temp > 60.0:
         return (240,66,47) #Rojo
-
+#Lista de puntos
+pts = deque([])
+def add_point(p):
+    if(len(pts) == 40):
+        pts.popleft()
+    pts.append(p)
+#Recibe una lista de 1 dimension con los valores de los puntos
+def graph_points(points):
+    x_space = 10
+    x = 240 #Primer punto
+    for i in range(len(points) - 1):
+        pygame.draw.line(screen,(255,255,0),
+                (x,points[i]),(x + x_space , points[i+1]),2)
+        x = x + x_space
 #### Bloque de inicialización ###
 pygame.init()
 #Tamaño de ventana
-screen = pygame.display.set_mode((250,500))
+screen = pygame.display.set_mode((650,500))
 #Superficie del tamaño de la ventana
 background = pygame.Surface(screen.get_size())
 #Background color
@@ -66,11 +81,15 @@ while mainloop:
     #Calcular punto de termómetro
     temp = tc.get_temp(adc_val)
     y = m * temp + y_min
+    #Añadir punto a lista
+    add_point(y)
     #Background blanco
     screen.blit(background,(0,0))
     #Dibujar polígono de term
     pygame.draw.polygon(screen,get_color(temp),
             [(38.0,y_min),(217.0,y_min),(217.0,y),(38.0,y)])
+    #Dibujar puntos gráfica
+    graph_points(pts)
     #Escribir valor temp
     textsurf = myfont.render("{0:03.3f} C".format(temp),True,(0,0,0))
     #Actualizar pantalla
