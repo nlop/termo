@@ -76,7 +76,7 @@ while mainloop:
     #Dibujar background sobre pantalla
     screen.blit(bkgr_img,(0,0))
     #### SERIAL COMMS ####
-    adc_val = int.from_bytes(ser.readline()[:-2],"little")
+    adc_val = int.from_bytes(ser.readline()[:-2],'big')
     #### SERIAL COMMS ####
     #Calcular punto de termómetro
     temp = tc.get_temp(adc_val)
@@ -88,14 +88,15 @@ while mainloop:
     #Dibujar polígono de term
     pygame.draw.polygon(screen,get_color(temp),
             [(38.0,y_min),(217.0,y_min),(217.0,y),(38.0,y)])
-    #Dibujar puntos gráfica
-    graph_points(pts)
     #Escribir valor temp
-    textsurf = myfont.render("{0:03.3f} C".format(temp),True,(0,0,0))
+    textsurf = myfont.render("{0:+04.4f} C".format(temp),True,(0,0,0))
     #Actualizar pantalla
-    screen.blit(textsurf,(45,455))
+    screen.blit(textsurf,(50,450))
     #Background skin
     screen.blit(bkgr_img,(0,0))
+    #Dibujar puntos gráfica
+    graph_points(pts)
+    #Actualizar display
     pygame.display.flip()
 #Finalmente
 pygame.quit()
